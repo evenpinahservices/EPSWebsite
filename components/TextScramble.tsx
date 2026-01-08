@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 const phrases = [
   'Optimize your workflow.',
   'Organize your mess.',
+  'Tailored solutions designed just for you.',
 ]
 
 // Code-like characters
@@ -58,8 +59,8 @@ export default function TextScramble({ onScramblingChange }: TextScrambleProps) 
       const nextIndex = (currentIndex + 1) % phrases.length
       const isLoopingBack = nextIndex === 0
       
-      // Wait longer before looping back to start (5 seconds), otherwise 8 seconds
-      const delay = isLoopingBack ? 5000 : 8000
+      // Wait before switching messages - reduced for quicker transitions
+      const delay = isLoopingBack ? 3000 : 4000
       
       timeoutRef.current = setTimeout(() => {
         setCurrentIndex(nextIndex)
