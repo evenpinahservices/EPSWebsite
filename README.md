@@ -56,4 +56,3 @@ The project is optimized for Vercel deployment. Simply connect your repository t
 - ✅ Client logo marquee
 - ✅ Testimonial cards
 - ✅ Optimized performance
-
