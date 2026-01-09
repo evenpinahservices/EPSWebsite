@@ -36,7 +36,7 @@ export default function Vision() {
   const totalChars = paragraphText.length
 
   return (
-    <section id="vision" ref={containerRef} className="py-24 sm:py-32 bg-white flex items-center justify-center min-h-[60vh] relative overflow-hidden">
+    <section id="vision" ref={containerRef} className="pt-32 sm:pt-40 pb-24 sm:pb-32 bg-white flex items-center justify-center min-h-[60vh] relative overflow-hidden">
       {/* Gradient blend at top - centered transition */}
       <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-[#eceae2] via-[#eceae2]/30 to-transparent pointer-events-none" />
       <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 w-full relative z-10">
@@ -108,12 +108,12 @@ function CharReveal({
   const opacity = useTransform(
     revealProgress,
     (progress: number) => {
-      // Start at 0.5 opacity for all text, then reveal to 1.0 letter by letter
-      if (progress <= startProgress) return 0.5
+      // Start at 0.2 opacity for all text, then reveal to 1.0 letter by letter
+      if (progress <= startProgress) return 0.2
       if (progress >= endProgress) return 1
-      // Smooth transition from 0.5 to 1.0 for this character
+      // Smooth transition from 0.2 to 1.0 for this character
       const revealAmount = (progress - startProgress) / (endProgress - startProgress)
-      return 0.5 + (revealAmount * 0.5)
+      return 0.2 + (revealAmount * 0.8)
     }
   )
   

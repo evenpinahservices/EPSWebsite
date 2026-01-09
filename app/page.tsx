@@ -3,6 +3,7 @@ import Hero from '@/components/Hero'
 import LogoCarousel from '@/components/LogoCarousel'
 import Mission from '@/components/Mission'
 import Vision from '@/components/Vision'
+import GradientTransition from '@/components/GradientTransition'
 import SocialProof from '@/components/SocialProof'
 import Booking from '@/components/Booking'
 import Footer from '@/components/Footer'
@@ -16,6 +17,7 @@ export default function Home() {
       <LogoCarousel />
       <Mission />
       <Vision />
+      <GradientTransition />
       <Booking />
       <SocialProof />
       <Footer />
