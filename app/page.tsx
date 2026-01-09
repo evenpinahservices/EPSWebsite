@@ -6,6 +6,7 @@ import Vision from '@/components/Vision'
 import SocialProof from '@/components/SocialProof'
 import Booking from '@/components/Booking'
 import Footer from '@/components/Footer'
+import BugReport from '@/components/BugReport'
 
 export default function Home() {
   return (
@@ -18,6 +19,7 @@ export default function Home() {
       <Booking />
       <SocialProof />
       <Footer />
+      <BugReport />
     </main>
   )
 }

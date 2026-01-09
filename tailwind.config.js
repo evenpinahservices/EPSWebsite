@@ -11,7 +11,7 @@ module.exports = {
         'primary-dark': '#1a2b4b',
         'secondary-accent': '#808c5a',
         'highlight-gold': '#b7965c',
-        'background-light': '#f0eee6',
+        'background-light': '#eceae2',
       },
       fontFamily: {
         serif: ['Lora', 'Playfair Display', 'serif'],

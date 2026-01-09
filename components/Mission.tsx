@@ -7,17 +7,17 @@ const methods = [
   {
     title: 'Efficiency',
     description: 'Creating personalized tools that do exactly what you need, eliminating wasted effort.',
-    image: '/efficiency-icon.png',
+    image: '/efficiency-gif.gif',
   },
   {
     title: 'Automation',
     description: "Automating the repetitive tasks you're already doing, but faster and better.",
-    image: '/automation-icon.png',
+    image: '/automation-gif.gif',
   },
   {
     title: 'Organization',
     description: 'Replacing scattered workflows with a single, personalized operating system.',
-    image: '/organization-icon.png',
+    image: '/organization-gif.gif',
   },
 ]
 
@@ -26,7 +26,7 @@ export default function Mission() {
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
-    <section id="mission" className="py-24 sm:py-32 bg-background-light">
+    <section id="mission" className="py-24 sm:py-32" style={{ backgroundColor: '#eceae2' }}>
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         {/* Main Content */}
         <motion.div
@@ -51,19 +51,13 @@ export default function Mission() {
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 className="flex flex-col items-center text-center px-4 md:px-8"
               >
-                <div className="mb-6 flex items-center justify-center w-20 h-20">
+                <div className="mb-6 flex items-center justify-center w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48">
                   <img
                     src={method.image}
                     alt={method.title}
-                    width={80}
-                    height={80}
+                    width={192}
+                    height={192}
                     className="object-contain w-full h-full"
-                    onError={(e) => {
-                      // Show placeholder if image doesn't exist
-                      const target = e.currentTarget
-                      target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjRjBFRUU2Ii8+CjxwYXRoIGQ9Ik00MCAyNUw0MCA1NUw1NSA2NSIgc3Ryb2tlPSIjODA4QzVBIiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K'
-                      target.style.opacity = '0.5'
-                    }}
                   />
                 </div>
                 <h3 className="text-2xl font-serif font-bold text-primary-dark mb-4">
