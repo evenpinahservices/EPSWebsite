@@ -65,14 +65,7 @@ function MethodItem({
         className="flex flex-col items-center text-center px-4 md:px-8"
       >
         <div 
-          className={`mb-6 flex items-center justify-center cursor-pointer ${
-            method.title === 'Automation' 
-              ? 'w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-full p-4' 
-              : 'w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48'
-          }`}
-          style={method.title === 'Automation' ? {
-            background: 'radial-gradient(circle, #eaeae1 0%, #eaeae1 50%, #efeee5 100%)',
-          } : undefined}
+          className="mb-6 flex items-center justify-center cursor-pointer w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48"
           onMouseEnter={(e) => {
             if (isDesktop) {
               const video = e.currentTarget.querySelector('video') as HTMLVideoElement
@@ -92,35 +85,61 @@ function MethodItem({
             }
           }}
         >
-          {isDesktop ? (
-            <video
-              src={method.video}
-              muted
-              playsInline
-              loop={false}
-              preload="metadata"
-              className={`object-contain ${
-                method.title === 'Automation'
-                  ? 'w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44'
-                  : 'w-full h-full'
-              }`}
-              aria-label={method.title}
-            />
+          {method.title === 'Automation' ? (
+            <div 
+              className="w-full h-full rounded-full p-3 sm:p-4 md:p-5"
+              style={{
+                background: 'radial-gradient(circle, #eaeae1 60%, #efeee5 100%)',
+              }}
+            >
+              {isDesktop ? (
+                <video
+                  src={method.video}
+                  muted
+                  playsInline
+                  loop={false}
+                  preload="metadata"
+                  className="object-contain w-full h-full"
+                  aria-label={method.title}
+                />
+              ) : (
+                <video
+                  ref={videoRef}
+                  src={method.video}
+                  muted
+                  playsInline
+                  loop={false}
+                  preload="metadata"
+                  className="object-contain w-full h-full"
+                  aria-label={method.title}
+                />
+              )}
+            </div>
           ) : (
-            <video
-              ref={videoRef}
-              src={method.video}
-              muted
-              playsInline
-              loop={false}
-              preload="metadata"
-              className={`object-contain ${
-                method.title === 'Automation'
-                  ? 'w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44'
-                  : 'w-full h-full'
-              }`}
-              aria-label={method.title}
-            />
+            <>
+              {isDesktop ? (
+                <video
+                  src={method.video}
+                  muted
+                  playsInline
+                  loop={false}
+                  preload="metadata"
+                  className="object-contain w-full h-full"
+                  aria-label={method.title}
+                />
+              ) : (
+                <video
+                  ref={videoRef}
+                  src={method.video}
+                  muted
+                  playsInline
+                  loop={false}
+                  preload="metadata"
+                  className="object-contain w-full h-full"
+                  aria-label={method.title}
+                />
+              )}
+            </>
           )}
         </div>
         <h3 className="text-2xl font-serif font-bold text-primary-dark mb-4">
