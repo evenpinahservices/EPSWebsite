@@ -4,9 +4,10 @@ import { motion } from 'framer-motion'
 import { useRef, useEffect, useState } from 'react'
 
 const logos = [
-  'SoulSparks',
-  'Chesbon Hanefesh',
-  'Aunty Simcha',
+  'BabyClue',
+  'LiritShadchanit',
+  'Simcha Gefen',
+  'YingYang',
 ]
 
 export default function LogoCarousel() {
