@@ -1,27 +1,23 @@
 'use client'
 
 import { motion, useInView } from 'framer-motion'
-import { useRef, useEffect } from 'react'
-import { useIsDesktop } from './useIsDesktop'
+import { useRef, useEffect, useState } from 'react'
 
 const methods = [
   {
     title: 'Efficiency',
     description: 'Creating personalized tools that do exactly what you need, eliminating wasted effort.',
     video: '/efficiency-mp4.mp4',
-    fallback: '/efficiency-icon.png', // Static fallback image
   },
   {
     title: 'Automation',
     description: "Automating the repetitive tasks you're already doing, but faster and better.",
     video: '/automation-mp4.mp4',
-    fallback: '/automation-icon.png',
   },
   {
     title: 'Organization',
     description: 'Replacing scattered workflows with a single, personalized operating system.',
     video: '/organization-mp4.mp4',
-    fallback: '/organization-icon.png',
   },
 ]
 
@@ -29,34 +25,62 @@ function MethodItem({
   method, 
   index, 
   isSectionInView,
-  isDesktop 
 }: { 
   method: typeof methods[0]
   index: number
   isSectionInView: boolean
-  isDesktop: boolean
 }) {
   const itemRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const isItemInView = useInView(itemRef, { once: false, margin: '-50px' })
+  const [isDesktop, setIsDesktop] = useState(false)
 
-  // Control video playback on mobile/tablet
+  // Check for desktop after mount (client-side only)
   useEffect(() => {
-    if (!isDesktop && videoRef.current) {
+    setIsDesktop(window.innerWidth >= 768)
+    
+    const handleResize = () => setIsDesktop(window.innerWidth >= 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Control video playback
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    if (isDesktop) {
+      // Desktop: video plays on hover only, handled by mouse events
+      video.pause()
+      video.currentTime = 0
+    } else {
+      // Mobile: play when in viewport
       if (isItemInView) {
-        // Play video when entering viewport
-        videoRef.current.currentTime = 0
-        videoRef.current.play().catch(console.error)
+        video.currentTime = 0
+        video.play().catch(() => {})
       } else {
-        // Pause and reset when leaving viewport
-        videoRef.current.pause()
-        videoRef.current.currentTime = 0
+        video.pause()
+        video.currentTime = 0
       }
     }
   }, [isItemInView, isDesktop])
 
+  const handleMouseEnter = () => {
+    if (isDesktop && videoRef.current) {
+      videoRef.current.currentTime = 0
+      videoRef.current.play().catch(() => {})
+    }
+  }
+
+  const handleMouseLeave = () => {
+    if (isDesktop && videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0
+    }
+  }
+
   return (
-    <div key={method.title} className="relative">
+    <div className="relative">
       <motion.div
         ref={itemRef}
         initial={{ opacity: 0, y: 50 }}
@@ -66,24 +90,8 @@ function MethodItem({
       >
         <div 
           className="mb-6 flex items-center justify-center cursor-pointer w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48"
-          onMouseEnter={(e) => {
-            if (isDesktop) {
-              const video = e.currentTarget.querySelector('video') as HTMLVideoElement
-              if (video) {
-                video.currentTime = 0
-                video.play()
-              }
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (isDesktop) {
-              const video = e.currentTarget.querySelector('video') as HTMLVideoElement
-              if (video) {
-                video.pause()
-                video.currentTime = 0
-              }
-            }
-          }}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           {method.title === 'Automation' ? (
             <div 
@@ -92,54 +100,28 @@ function MethodItem({
                 background: 'radial-gradient(circle, #eaeae1 60%, #efeee5 100%)',
               }}
             >
-              {isDesktop ? (
-                <video
-                  src={method.video}
-                  muted
-                  playsInline
-                  loop={false}
-                  preload="metadata"
-                  className="object-contain w-full h-full"
-                  aria-label={method.title}
-                />
-              ) : (
-                <video
-                  ref={videoRef}
-                  src={method.video}
-                  muted
-                  playsInline
-                  loop={false}
-                  preload="metadata"
-                  className="object-contain w-full h-full"
-                  aria-label={method.title}
-                />
-              )}
+              <video
+                ref={videoRef}
+                src={method.video}
+                muted
+                playsInline
+                loop={!isDesktop}
+                preload="metadata"
+                className="object-contain w-full h-full"
+                aria-label={method.title}
+              />
             </div>
           ) : (
-            <>
-              {isDesktop ? (
-                <video
-                  src={method.video}
-                  muted
-                  playsInline
-                  loop={false}
-                  preload="metadata"
-                  className="object-contain w-full h-full"
-                  aria-label={method.title}
-                />
-              ) : (
-                <video
-                  ref={videoRef}
-                  src={method.video}
-                  muted
-                  playsInline
-                  loop={false}
-                  preload="metadata"
-                  className="object-contain w-full h-full"
-                  aria-label={method.title}
-                />
-              )}
-            </>
+            <video
+              ref={videoRef}
+              src={method.video}
+              muted
+              playsInline
+              loop={!isDesktop}
+              preload="metadata"
+              className="object-contain w-full h-full"
+              aria-label={method.title}
+            />
           )}
         </div>
         <h3 className="text-2xl font-serif font-bold text-primary-dark mb-4">
@@ -156,7 +138,6 @@ function MethodItem({
 export default function Mission() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
-  const isDesktop = useIsDesktop()
 
   return (
     <section id="mission" className="py-24 sm:py-32" style={{ backgroundColor: '#efeee5' }}>
@@ -182,7 +163,6 @@ export default function Mission() {
               method={method}
               index={index}
               isSectionInView={isInView}
-              isDesktop={isDesktop}
             />
           ))}
         </div>

@@ -6,13 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "get-refresh-token": "node get-refresh-token.js"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.51.1",
+    "dotenv": "^17.2.3",
     "framer-motion": "^11.3.19",
+    "googleapis": "^170.0.0",
     "html2canvas": "^1.4.1",
     "next": "^14.2.5",
+    "nodemailer": "^7.0.12",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

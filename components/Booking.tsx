@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useInView } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 
 export default function Booking() {
   const ref = useRef(null)
@@ -73,146 +73,32 @@ export default function Booking() {
 }
 
 function CalendarBooking() {
-  const [selectedDate, setSelectedDate] = useState<string>('')
-  const [selectedTime, setSelectedTime] = useState<string>('')
-  const [name, setName] = useState<string>('')
-  const [email, setEmail] = useState<string>('')
-  const [message, setMessage] = useState<string>('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  useEffect(() => {
+    // Load Calendly script
+    const script = document.createElement('script')
+    script.src = 'https://assets.calendly.com/assets/external/widget.js'
+    script.async = true
+    document.body.appendChild(script)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    
-    // TODO: Integrate with calendar API (Calendly, Google Calendar, etc.)
-    // For now, this is a placeholder that shows the structure
-    console.log('Booking submitted:', { selectedDate, selectedTime, name, email, message })
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false)
-      alert('Meeting request submitted! (This is a placeholder - backend integration needed)')
-      // Reset form
-      setSelectedDate('')
-      setSelectedTime('')
-      setName('')
-      setEmail('')
-      setMessage('')
-    }, 1000)
-  }
-
-  // Generate time slots (placeholder - would come from calendar API)
-  const timeSlots = [
-    '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
-    '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'
-  ]
+    return () => {
+      // Cleanup: remove script when component unmounts
+      const existingScript = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]')
+      if (existingScript) {
+        document.body.removeChild(existingScript)
+      }
+    }
+  }, [])
 
   return (
     <div>
       <h3 className="text-2xl font-serif font-bold text-primary-dark mb-6 text-center">
         Book a Consultation
       </h3>
-      
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-primary-dark mb-2">
-              Your Name *
-            </label>
-            <input
-              type="text"
-              id="name"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 border border-primary-dark/20 rounded-lg focus:ring-2 focus:ring-highlight-gold focus:border-highlight-gold outline-none transition-all"
-              placeholder="John Doe"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-primary-dark mb-2">
-              Email Address *
-            </label>
-            <input
-              type="email"
-              id="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-primary-dark/20 rounded-lg focus:ring-2 focus:ring-highlight-gold focus:border-highlight-gold outline-none transition-all"
-              placeholder="john@example.com"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="date" className="block text-sm font-medium text-primary-dark mb-2">
-              Preferred Date *
-            </label>
-            <input
-              type="date"
-              id="date"
-              required
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              min={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-3 border border-primary-dark/20 rounded-lg focus:ring-2 focus:ring-highlight-gold focus:border-highlight-gold outline-none transition-all"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="time" className="block text-sm font-medium text-primary-dark mb-2">
-              Preferred Time *
-            </label>
-            <select
-              id="time"
-              required
-              value={selectedTime}
-              onChange={(e) => setSelectedTime(e.target.value)}
-              className="w-full px-4 py-3 border border-primary-dark/20 rounded-lg focus:ring-2 focus:ring-highlight-gold focus:border-highlight-gold outline-none transition-all"
-            >
-              <option value="">Select a time</option>
-              {timeSlots.map((time) => (
-                <option key={time} value={time}>
-                  {time}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="message" className="block text-sm font-medium text-primary-dark mb-2">
-            Tell us about your project (optional)
-          </label>
-          <textarea
-            id="message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows={4}
-            className="w-full px-4 py-3 border border-primary-dark/20 rounded-lg focus:ring-2 focus:ring-highlight-gold focus:border-highlight-gold outline-none transition-all resize-none"
-            placeholder="Brief description of what you'd like to discuss..."
-          />
-        </div>
-
-        <motion.button
-          type="submit"
-          disabled={isSubmitting}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full bg-primary-dark text-background-light py-4 rounded-lg font-semibold hover:bg-primary-dark/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? 'Scheduling...' : 'Schedule Meeting'}
-        </motion.button>
-
-        <p className="text-xs text-primary-dark/50 text-center">
-          * After submission, you'll receive a confirmation email with calendar details.
-          <br />
-          (Backend integration required for full functionality)
-        </p>
-      </form>
+      <div 
+        className="calendly-inline-widget" 
+        data-url="https://calendly.com/natanelrichey-work/30min?text_color=1a2b4b&primary_color=b7965c" 
+        style={{ minWidth: '320px', height: '700px' }}
+      />
     </div>
   )
 }
@@ -223,25 +109,47 @@ function EmailContact() {
   const [subject, setSubject] = useState<string>('')
   const [message, setMessage] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string>('')
+  const [submitSuccess, setSubmitSuccess] = useState<string>('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setSubmitError('')
+    setSubmitSuccess('')
     
-    // TODO: Integrate with email service (SendGrid, Resend, etc.)
-    // For now, this is a placeholder
-    console.log('Email submitted:', { name, email, subject, message })
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/booking/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          subject,
+          message,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setSubmitSuccess('Message sent successfully! We\'ll get back to you within 24 hours.')
+        // Reset form
+        setName('')
+        setEmail('')
+        setSubject('')
+        setMessage('')
+      } else {
+        setSubmitError(data.error || 'Failed to send message. Please try again.')
+      }
+    } catch (error) {
+      setSubmitError('An error occurred. Please try again later.')
+      console.error('Error sending email:', error)
+    } finally {
       setIsSubmitting(false)
-      alert('Message sent! (This is a placeholder - backend integration needed)')
-      // Reset form
-      setName('')
-      setEmail('')
-      setSubject('')
-      setMessage('')
-    }, 1000)
+    }
   }
 
   return (
@@ -313,6 +221,18 @@ function EmailContact() {
           />
         </div>
 
+        {submitError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {submitError}
+          </div>
+        )}
+
+        {submitSuccess && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+            {submitSuccess}
+          </div>
+        )}
+
         <motion.button
           type="submit"
           disabled={isSubmitting}
@@ -325,8 +245,6 @@ function EmailContact() {
 
         <p className="text-xs text-primary-dark/50 text-center">
           * We'll respond to your message within 24 hours.
-          <br />
-          (Backend integration required for full functionality)
         </p>
       </form>
     </div>
