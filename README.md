@@ -16,7 +16,7 @@ A high-performance, aesthetically pleasing landing page for Even Pinah Services,
 - Primary Dark: `#1a2b4b` (Deep Navy)
 - Secondary Accent: `#808c5a` (Muted Olive)
 - Highlight/Gold: `#b7965c` (Antique Gold)
-- Background/Light: `#eceae2` (Off-white/Cream)
+- Background/Light: `#efeee5` (Off-white/Cream)
 
 ### Typography
 - **Headings:** Lora (Serif)

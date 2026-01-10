@@ -6,12 +6,12 @@ import io
 import os
 
 # Set up the figure and axis
-fig, ax = plt.subplots(figsize=(6, 6), facecolor='#eceae2')
+fig, ax = plt.subplots(figsize=(6, 6), facecolor='#efeee5')
 ax.set_xlim(-1.2, 1.2)
 ax.set_ylim(-1.2, 1.2)
 ax.set_aspect('equal')
 ax.axis('off')
-ax.set_facecolor('#eceae2')
+ax.set_facecolor('#efeee5')
 
 # Total number of frames for the animation
 total_frames = 200
@@ -28,8 +28,8 @@ for frame in range(total_frames):
     ax.set_ylim(-1.2, 1.2)
     ax.set_aspect('equal')
     ax.axis('off')
-    ax.set_facecolor('#eceae2')
-    fig.patch.set_facecolor('#eceae2')
+    ax.set_facecolor('#efeee5')
+    fig.patch.set_facecolor('#efeee5')
     
     # Draw stopwatch circle
     circle = plt.Circle((0, 0), 0.9, fill=False, edgecolor='#6B7A47', linewidth=3)
@@ -79,7 +79,7 @@ for frame in range(total_frames):
     
     # Save frame to buffer
     buf = io.BytesIO()
-    fig.savefig(buf, format='png', facecolor='#eceae2', edgecolor='none', dpi=100, bbox_inches='tight', pad_inches=0)
+    fig.savefig(buf, format='png', facecolor='#efeee5', edgecolor='none', dpi=100, bbox_inches='tight', pad_inches=0)
     buf.seek(0)
     frames.append(Image.open(buf).convert('RGBA'))
     buf.close()

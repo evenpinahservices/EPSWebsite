@@ -14,9 +14,25 @@ export default function LogoCarousel() {
   const carouselRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (carouselRef.current) {
-      const width = carouselRef.current.scrollWidth / 2
-      setCarouselWidth(width)
+    const calculateWidth = () => {
+      if (carouselRef.current) {
+        // Calculate width of one set of logos
+        const children = Array.from(carouselRef.current.children) as HTMLElement[]
+        if (children.length > 0) {
+          const firstSetWidth = children.slice(0, logos.length).reduce((acc, child) => {
+            return acc + child.offsetWidth
+          }, 0)
+          const gap = 64 // gap-16 = 4rem = 64px on md screens
+          setCarouselWidth(firstSetWidth + (gap * (logos.length - 1)))
+        }
+      }
+    }
+    
+    calculateWidth()
+    window.addEventListener('resize', calculateWidth)
+    
+    return () => {
+      window.removeEventListener('resize', calculateWidth)
     }
   }, [])
 

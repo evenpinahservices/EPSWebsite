@@ -38,7 +38,7 @@ export default function Vision() {
   return (
     <section id="vision" ref={containerRef} className="pt-32 sm:pt-40 pb-24 sm:pb-32 bg-white flex items-center justify-center min-h-[60vh] relative overflow-hidden">
       {/* Gradient blend at top - centered transition */}
-      <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-[#eceae2] via-[#eceae2]/30 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-[#efeee5] via-[#efeee5]/30 to-transparent pointer-events-none" />
       <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 w-full relative z-10">
         <motion.div
           ref={ref}

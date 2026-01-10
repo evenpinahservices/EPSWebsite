@@ -1,15 +1,18 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useInView } from 'framer-motion'
 import { useRef, useState } from 'react'
 import TextScramble from './TextScramble'
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const heroRef = useRef<HTMLDivElement>(null)
   const [isScrambling, setIsScrambling] = useState(false)
+  // Arrow stays visible until hero section is completely out of view
+  const isHeroInView = useInView(heroRef, { once: false, margin: '-100% 0px' })
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background-light pt-16 sm:pt-20">
+    <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background-light pt-16 sm:pt-20">
       {/* Liquid Animation Background - fades out at bottom */}
       <div ref={containerRef} className="absolute inset-0 overflow-hidden">
         <LiquidBackground />
@@ -88,48 +91,51 @@ export default function Hero() {
         </div>
       </motion.div>
 
-      {/* Scroll Down Arrow - Fixed to bottom of viewport */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, delay: 1 }}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
-      >
-        <motion.a
-          href="#mission"
-          whileHover={{ y: 5 }}
-          whileTap={{ scale: 0.95 }}
-          className="inline-flex items-center justify-center text-primary-dark/60 hover:text-primary-dark transition-colors"
-          aria-label="Scroll down"
+      {/* Scroll Down Arrow - Only show when hero is in view */}
+      {isHeroInView && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="fixed bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-20"
         >
-          <motion.svg
-            className="w-8 h-8"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            animate={isScrambling ? {
-              y: [0, -8, 0, -8, 0, -8, 0],
-            } : {
-              y: 0,
-            }}
-            transition={isScrambling ? {
-              duration: 1.2,
-              times: [0, 0.2, 0.4, 0.5, 0.7, 0.85, 1],
-              ease: 'easeInOut',
-            } : {
-              duration: 0.3,
-              ease: 'easeOut',
-            }}
+          <motion.a
+            href="#mission"
+            whileHover={{ y: 5 }}
+            whileTap={{ scale: 0.95 }}
+            className="inline-flex items-center justify-center text-primary-dark/60 hover:text-primary-dark transition-colors"
+            aria-label="Scroll down"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-          </motion.svg>
-        </motion.a>
-      </motion.div>
+            <motion.svg
+              className="w-8 h-8"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              animate={isScrambling ? {
+                y: [0, -8, 0, -8, 0, -8, 0],
+              } : {
+                y: 0,
+              }}
+              transition={isScrambling ? {
+                duration: 1.2,
+                times: [0, 0.2, 0.4, 0.5, 0.7, 0.85, 1],
+                ease: 'easeInOut',
+              } : {
+                duration: 0.3,
+                ease: 'easeOut',
+              }}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+              />
+            </motion.svg>
+          </motion.a>
+        </motion.div>
+      )}
     </section>
   )
 }

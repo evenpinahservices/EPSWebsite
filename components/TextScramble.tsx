@@ -78,12 +78,8 @@ export default function TextScramble({ onScramblingChange }: TextScrambleProps) 
   }, [currentIndex, scrambleText])
 
   return (
-    <motion.span
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="inline-block"
-    >
+    <span className="inline-block">
       {displayText}
-    </motion.span>
+    </span>
   )
 }

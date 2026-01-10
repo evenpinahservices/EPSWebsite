@@ -16,8 +16,8 @@ const lora = Lora({
 })
 
 export const metadata: Metadata = {
-  title: 'Even Pinah Services - Curing Operational Chaos for Small Businesses',
-  description: 'We eliminate the 20% of waste—the manual, repetitive tasks that distract you from your real work.',
+  title: 'Even Pinah Services',
+  description: 'Curing Operational Chaos for Small Businesses',
 }
 
 export default function RootLayout({
