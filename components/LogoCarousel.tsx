@@ -12,7 +12,21 @@ const logos = [
 
 export default function LogoCarousel() {
   const [carouselWidth, setCarouselWidth] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
   const carouselRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile)
+    }
+  }, [])
 
   useEffect(() => {
     const calculateWidth = () => {
@@ -51,7 +65,7 @@ export default function LogoCarousel() {
           }}
           transition={{
             x: {
-              repeat: Infinity,
+              repeat: isMobile ? 0 : Infinity,
               repeatType: 'loop',
               duration: 25,
               ease: 'linear',

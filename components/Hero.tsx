@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, useInView } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import TextScramble from './TextScramble'
 
 export default function Hero() {
@@ -141,6 +141,21 @@ export default function Hero() {
 }
 
 function LiquidBackground() {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile)
+    }
+  }, [])
+
   return (
     <div className="absolute inset-0">
       {/* Animated blobs - Gold/Beige tones only, no green */}
@@ -160,7 +175,7 @@ function LiquidBackground() {
         }}
         transition={{
           duration: 20,
-          repeat: Infinity,
+          repeat: isMobile ? 0 : Infinity,
           ease: 'easeInOut',
         }}
       />
@@ -181,7 +196,7 @@ function LiquidBackground() {
         }}
         transition={{
           duration: 25,
-          repeat: Infinity,
+          repeat: isMobile ? 0 : Infinity,
           ease: 'easeInOut',
         }}
       />
@@ -202,7 +217,7 @@ function LiquidBackground() {
         }}
         transition={{
           duration: 30,
-          repeat: Infinity,
+          repeat: isMobile ? 0 : Infinity,
           ease: 'easeInOut',
         }}
       />

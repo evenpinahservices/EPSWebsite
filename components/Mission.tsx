@@ -105,7 +105,7 @@ function MethodItem({
                 src={method.video}
                 muted
                 playsInline
-                loop={!isDesktop}
+                loop={false}
                 preload="metadata"
                 className="object-contain w-full h-full"
                 aria-label={method.title}
@@ -117,7 +117,7 @@ function MethodItem({
               src={method.video}
               muted
               playsInline
-              loop={!isDesktop}
+              loop={false}
               preload="metadata"
               className="object-contain w-full h-full"
               aria-label={method.title}

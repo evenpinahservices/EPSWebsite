@@ -6,19 +6,24 @@ import { useRef } from 'react'
 
 const testimonials = [
   {
-    quote: "Even Pinah didn't just build an app; they saved me 10 hours a week on manual data entry.",
-    client: 'Sarah M.',
-    company: 'SoulSparks',
+    quote: "Natanel is one of a kind, a perfect and refreshing mix of professionalism and delightful service!! He is fun  and easy to work with, and works dilligently to try and grasp exactly what the client is looking for, which results in 100% customer satisfaction!! I truly, honestly and very highly recommend Natanel for your next project!!",
+    client: 'Lirit A',
+    company: '',
   },
   {
-    quote: "The custom platform transformed how we manage our operations. Everything is now in one place, and it just works.",
-    client: 'David K.',
-    company: 'Chesbon Hanefesh',
+    quote: "Absolutely one of the best (and dearest) people I have worked with. Natanel is a superb communicator, incredibly responsible, and always keeps an eye on the big picture. I'm a fan, always.",
+    client: 'Jonatan V',
+    company: '',
   },
   {
-    quote: "Finally, a solution that understands our business needs. The automation has been a game-changer.",
-    client: 'Rachel L.',
-    company: 'Aunty Simcha',
+    quote: "It was a pleasure working with Natanel. I genuinely enjoyed the collaboration. Natanel was always open to my suggestions and willing to learn things beyond the project scope to complete the job. I believe his openness to feedback were key to achieving success.",
+    client: 'Yigal N',
+    company: '',
+  },
+  {
+    quote: "I had the pleasure of working with Natanel. Natanel is an exceptional developer a sharp analytical mind. Beyond his technical skills, he is professional and someone who brings both talent and a positive attitude to any project. I highly recommend him for th job!",
+    client: 'Yehonatan E',
+    company: '',
   },
 ]
 
@@ -34,7 +39,7 @@ export default function SocialProof() {
           <h2 className="text-2xl sm:text-3xl font-serif font-bold text-primary-dark text-center mb-12">
             What Our Clients Say
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={index}
@@ -49,7 +54,9 @@ export default function SocialProof() {
                 </p>
                 <div className="border-t border-primary-dark/10 pt-4">
                   <p className="font-semibold text-primary-dark">{testimonial.client}</p>
-                  <p className="text-secondary-accent text-sm">{testimonial.company}</p>
+                  {testimonial.company && (
+                    <p className="text-secondary-accent text-sm">{testimonial.company}</p>
+                  )}
                 </div>
               </motion.div>
             ))}
