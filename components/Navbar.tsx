@@ -31,9 +31,16 @@ export default function Navbar() {
             <motion.a
               href="#"
               whileHover={{ scale: 1.02 }}
-              className="text-base sm:text-lg md:text-xl lg:text-2xl font-serif font-semibold text-primary-dark whitespace-nowrap"
+              className="flex items-center gap-2 sm:gap-2.5 md:gap-3"
             >
-              Even Pinah Services
+              <img
+                src="/logo.png"
+                alt="Even Pinah Services Logo"
+                className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 lg:h-9 lg:w-9 object-contain"
+              />
+              <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-serif font-semibold text-primary-dark whitespace-nowrap">
+                Even Pinah Services
+              </span>
             </motion.a>
           </div>
 
