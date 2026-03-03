@@ -24,3 +24,50 @@
   }
 }
 
+/* Internal proposal PDF: white page throughout, no coloured margins, styled page numbers */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .internal-nav-header {
+    display: none !important;
+  }
+
+  /* Entire page white so margins and content area match (no white margin band) */
+  body {
+    background: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+
+  #proposal-preview,
+  .proposal-preview {
+    box-shadow: none;
+    max-width: none;
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .proposal-preview > div {
+    padding-top: 1.2cm !important;
+    padding-left: 1cm !important;
+    padding-right: 1cm !important;
+    padding-bottom: 2cm !important;
+  }
+
+  @page {
+    margin: 0;
+  }
+}
+
