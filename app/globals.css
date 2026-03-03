@@ -60,14 +60,27 @@
   }
 
   .proposal-preview > div {
-    padding-top: 1.2cm !important;
-    padding-left: 1cm !important;
-    padding-right: 1cm !important;
-    padding-bottom: 2cm !important;
+    padding: 1.2cm 1cm !important;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
 
-  @page {
-    margin: 0;
+  .proposal-preview table,
+  .proposal-preview .overflow-x-auto,
+  .proposal-preview .overflow-x-auto * {
+    -webkit-box-decoration-break: slice;
+    box-decoration-break: slice;
+  }
+
+  .proposal-preview thead {
+    display: table-row-group;
+  }
+
+  .proposal-preview tfoot {
+    display: table-row-group;
   }
 }
 
+@page {
+  margin: 0 !important;
+}
