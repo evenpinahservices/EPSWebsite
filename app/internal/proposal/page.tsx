@@ -132,7 +132,7 @@ function ProposalPreview({ data }: { data: ProposalData }) {
           </h2>
           <ul className="space-y-2 text-primary-dark list-none">
             <li><span className="tabular-nums text-primary-dark/90 mr-2">6.1</span><span className={labelClass}>Estimated Development Hours:</span> {data.estimatedHours}</li>
-            <li><span className="tabular-nums text-primary-dark/90 mr-2">6.2</span><span className={labelClass}>Base Project Fee:</span> {data.baseProjectFee}</li>
+            <li><span className="tabular-nums text-primary-dark/90 mr-2">6.2</span><span className={labelClass}>Project Fee:</span> {data.baseProjectFee}</li>
             <li><span className="tabular-nums text-primary-dark/90 mr-2">6.3</span><span className={labelClass}>Payment Milestones:</span> {data.paymentMilestones}</li>
             <li><span className="tabular-nums text-primary-dark/90 mr-2">6.4</span><span className={labelClass}>Risk Buffer:</span> {data.riskBuffer?.trim() ? data.riskBuffer : 'None'}</li>
             <li><span className="tabular-nums text-primary-dark/90 mr-2">6.5</span><span className={labelClass}>External Costs:</span> {data.externalCosts}</li>
