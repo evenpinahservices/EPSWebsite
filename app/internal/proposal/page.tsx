@@ -156,9 +156,9 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
           </div>
         </section>
 
-        {/* ── 4. Deliverables & Obligations ── */}
+        {/* ── 4. Client Obligations ── */}
         <section className="mb-8">
-          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">4. Deliverables</h2>
+          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">4. Client Obligations</h2>
           <div className="space-y-4">
             {data.clientMustProvide.length > 0 && (() => {
               const n = sec4Next()
