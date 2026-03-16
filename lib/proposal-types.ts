@@ -1,88 +1,105 @@
 /**
- * Proposal data model for the internal product proposal PDF feature.
- * Mirrors the 6-section structure: Client Identity, Solution Vision, Scope Fence,
- * Requirements, Success Metrics, Quote.
+ * Proposal data model – single canonical version.
+ *
+ * Accepts both camelCase and snake_case JSON keys.
+ *
+ * contractType drives the milestones table:
+ *   "hourly"  → column shows estimated hours
+ *   "weekly" / "project" → column shows estimated weeks
+ *
+ * retainer & maintenance are boolean flags.
+ * When true, the document shows the corresponding subsection in the Quote.
  */
 
 export type LevelOfService = 'Level 1 (Micro-Tool/Website)' | 'Level 2 (Full App System)'
 
-/** Hourly-based contract: table shows estimated hours per milestone. Project-based: shows estimated days. */
-export type ContractType = 'hourly' | 'project'
+export type ContractType = 'hourly' | 'weekly' | 'project'
+
+export interface Obligations {
+  assets: string[]
+  technical: string[]
+  timeline: string[]
+}
 
 export interface ProjectMilestoneSubFeature {
   name: string
   hours?: number
   hoursMax?: number
-  days?: number
-  daysMax?: number
 }
 
 export interface ProjectMilestone {
   name: string
   hours?: number
   hoursMax?: number
-  days?: number
-  daysMax?: number
-  /** Optional breakdown of this milestone into features (e.g. MVP build → Feature 1, Feature 2, …) */
+  weeks?: number
   subFeatures?: ProjectMilestoneSubFeature[]
 }
 
 export interface ProposalData {
-  /** 1. The Client Identity (Context) */
+  /* ── 1. Client Details ── */
   clientName: string
-  /** Person the document is addressed to (signatory) */
   recipientName: string
   businessType: string
+
+  /* ── 2. Executive Summary ── */
   frankensteinStatus: string
   corePainPoint: string
-
-  /** 2. The Solution Vision (High Level) - levelOfService is internal only, not shown on PDF */
   concept: string
   levelOfService: LevelOfService
 
-  /** 3. The Scope Fence */
+  /* ── 3. Project Scope ── */
   inScope: string[]
   outOfScope: string[]
 
-  /** 4. Deliverables & Obligations */
+  /* ── 4. Deliverables & Obligations ── */
   clientMustProvide: string[]
-  /** Obligations to the client / what the client's client must provide */
-  clientObligations: string[]
+  obligations: Obligations
   technicalDependencies: string[]
 
-  /** 5. Success Metrics (Definition of Done) */
+  /* ── 5. Success Metrics ── */
   definitionOfDone: string[]
 
-  /** 6. The Quote */
+  /* ── 6. Quote ── */
   estimatedHours: string
+  estimatedTimeTotal: string
   baseProjectFee: string
+  contractType: ContractType
+
+  retainer: boolean
+  retainerAmount: string
+  retainerDuration: string
+  retainerDetails: string[]
+
+  maintenance: boolean
+  maintenanceAmount: string
+  maintenanceDuration: string
+  maintenanceDetails: string[]
+
   paymentMilestones: string
   riskBuffer: string
   externalCosts: string
-  /** Total quote amount (you insert this yourself) */
   totalQuoteAmount: string
 
-  /** Project timeline: hourly (show hours per phase) or project/deadline (show days per phase) */
-  contractType: ContractType
+  /* ── 7. Project Milestones ── */
   projectMilestones: ProjectMilestone[]
 
-  /** Dates */
+  /* ── 8. Terms and conditions ── */
+  termsAndConditions: string[] | Record<string, string | string[]>
+
+  /* ── Dates & signatures ── */
   proposalDate: string
   signatureDueDate: string
-
-  /** Sign page: signatory (provider) */
   myName: string
   myBusinessName: string
-  /** Signatory's organisation (shown under recipient name on sign page) */
   organisationName: string
 }
+
+/* ── Helpers ── */
 
 const LEVELS: LevelOfService[] = [
   'Level 1 (Micro-Tool/Website)',
   'Level 2 (Full App System)',
 ]
-
-const CONTRACT_TYPES: ContractType[] = ['hourly', 'project']
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === 'string')
@@ -97,197 +114,192 @@ function parseNum(v: unknown): number | undefined {
   return undefined
 }
 
-/** Parse "21 to 26", "21-26", "21 – 26" into { min, max }. Single number returns { min, max: same }. */
 function parseRange(v: unknown): { min: number; max: number } | undefined {
   if (typeof v === 'number' && !Number.isNaN(v)) return { min: v, max: v }
   if (typeof v !== 'string') return undefined
   const s = v.trim()
-  const toMatch = s.match(/^(\d+(?:\.\d+)?)\s*(?:\s+to\s+|\s*[-–—]\s*)\s*(\d+(?:\.\d+)?)$/i)
-  if (toMatch) {
-    const min = Number(toMatch[1])
-    const max = Number(toMatch[2])
-    if (!Number.isNaN(min) && !Number.isNaN(max)) return { min, max: max >= min ? max : min }
+  const m = s.match(/^(\d+(?:\.\d+)?)\s*(?:\s+to\s+|\s*[-–—]\s*)\s*(\d+(?:\.\d+)?)$/i)
+  if (m) {
+    const lo = Number(m[1])
+    const hi = Number(m[2])
+    if (!Number.isNaN(lo) && !Number.isNaN(hi)) return { min: lo, max: Math.max(lo, hi) }
   }
   const single = parseNum(s)
   if (single !== undefined) return { min: single, max: single }
   return undefined
 }
 
-function isProjectMilestone(value: unknown): value is Record<string, unknown> {
-  if (value === null || typeof value !== 'object') return false
+function str(v: unknown, fallback = ''): string {
+  return typeof v === 'string' ? v : fallback
+}
+
+function bool(v: unknown): boolean {
+  return v === true || v === 'true'
+}
+
+/** Read a value from an object trying camelCase first, then snake_case. */
+function get(o: Record<string, unknown>, camel: string, snake: string): unknown {
+  return o[camel] !== undefined ? o[camel] : o[snake]
+}
+
+/* ── Normalizers ── */
+
+function normalizeObligations(value: unknown): Obligations {
+  const empty: Obligations = { assets: [], technical: [], timeline: [] }
+  if (value === null || typeof value !== 'object') return empty
   const o = value as Record<string, unknown>
-  return typeof o.name === 'string'
+  return {
+    assets: isStringArray(o.assets) ? o.assets : [],
+    technical: isStringArray(o.technical) ? o.technical : [],
+    timeline: isStringArray(o.timeline) ? o.timeline : [],
+  }
+}
+
+function normalizeTermsAndConditions(value: unknown): string[] | Record<string, string | string[]> {
+  if (isStringArray(value)) return value
+  if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+    const o = value as Record<string, unknown>
+    const out: Record<string, string | string[]> = {}
+    for (const key of Object.keys(o)) {
+      const v = o[key]
+      if (typeof v === 'string') out[key] = v
+      else if (isStringArray(v)) out[key] = v
+    }
+    return Object.keys(out).length > 0 ? out : []
+  }
+  return []
 }
 
 function normalizeSubFeature(raw: unknown): ProjectMilestoneSubFeature | null {
   if (raw === null || typeof raw !== 'object') return null
   const o = raw as Record<string, unknown>
   if (typeof o.name !== 'string') return null
-  const hoursRange = parseRange(o.hours)
-  const daysRange = parseRange(o.days)
-  const hMin = hoursRange?.min ?? parseNum(o.hours)
-  const hMax = hoursRange?.max
-  const dMin = daysRange?.min ?? parseNum(o.days)
-  const dMax = daysRange?.max
+  const range = parseRange(o.hours)
+  const hMin = range?.min ?? parseNum(o.hours)
+  const hMax = range?.max
   return {
     name: o.name as string,
     hours: hMin,
     hoursMax: parseNum(o.hoursMax) ?? (hMax != null && hMax !== hMin ? hMax : undefined),
-    days: dMin,
-    daysMax: parseNum(o.daysMax) ?? (dMax != null && dMax !== dMin ? dMax : undefined),
   }
 }
 
-function normalizeProjectMilestones(value: unknown): ProjectMilestone[] {
+function normalizeMilestones(value: unknown): ProjectMilestone[] {
   if (!Array.isArray(value)) return []
   return value
-    .filter(isProjectMilestone)
-    .map((o) => {
-      const raw = o as Record<string, unknown>
-      const hoursRange = parseRange(raw.hours)
-      const hoursExplicitMax = parseNum(raw.hoursMax)
-      const daysRange = parseRange(raw.days)
-      const daysExplicitMax = parseNum(raw.daysMax)
-      const hMin = hoursRange?.min ?? parseNum(raw.hours)
-      const hMax = hoursRange?.max
-      const dMin = daysRange?.min ?? parseNum(raw.days)
-      const dMax = daysRange?.max
-      const subRaw = raw.subFeatures
-      const subFeatures: ProjectMilestoneSubFeature[] = Array.isArray(subRaw)
+    .filter((v): v is Record<string, unknown> =>
+      v !== null && typeof v === 'object' && typeof (v as Record<string, unknown>).name === 'string')
+    .map((raw) => {
+      const range = parseRange(raw.hours)
+      const hMin = range?.min ?? parseNum(raw.hours)
+      const hMax = range?.max
+      const subRaw = raw.subFeatures ?? raw.sub_features
+      const subs: ProjectMilestoneSubFeature[] = Array.isArray(subRaw)
         ? subRaw.map(normalizeSubFeature).filter((s): s is ProjectMilestoneSubFeature => s != null)
         : []
       return {
         name: raw.name as string,
         hours: hMin,
-        hoursMax: parseNum(raw.hoursMax) ?? (hMax != null && hMax !== hMin ? hMax : undefined),
-        days: dMin,
-        daysMax: parseNum(raw.daysMax) ?? (dMax != null && dMax !== dMin ? dMax : undefined),
-        subFeatures: subFeatures.length > 0 ? subFeatures : undefined,
+        hoursMax: parseNum(raw.hoursMax) ?? parseNum(raw.hours_max) ?? (hMax != null && hMax !== hMin ? hMax : undefined),
+        weeks: parseNum(raw.weeks),
+        subFeatures: subs.length > 0 ? subs : undefined,
       }
     })
 }
 
-/**
- * Type guard and validator for proposal JSON. Returns the parsed data or an error message.
- */
-export function parseProposalData(value: unknown): { success: true; data: ProposalData } | { success: false; error: string } {
+/* ── Main parser ── */
+
+export function parseProposalData(
+  value: unknown
+): { success: true; data: ProposalData } | { success: false; error: string } {
   if (value === null || typeof value !== 'object') {
     return { success: false, error: 'Input must be a JSON object.' }
   }
 
   const o = value as Record<string, unknown>
 
-  const clientName = o.clientName
-  if (typeof clientName !== 'string' || !clientName.trim()) {
-    return { success: false, error: 'clientName is required and must be a non-empty string.' }
-  }
+  const clientName = str(get(o, 'clientName', 'client_name'))
+  if (!clientName.trim()) return { success: false, error: 'clientName / client_name is required.' }
 
-  const businessType = o.businessType
-  if (typeof businessType !== 'string' || !businessType.trim()) {
-    return { success: false, error: 'businessType is required and must be a non-empty string.' }
-  }
+  const businessType = str(get(o, 'businessType', 'business_type'))
+  if (!businessType.trim()) return { success: false, error: 'businessType / business_type is required.' }
 
-  const frankensteinStatus = o.frankensteinStatus
-  if (typeof frankensteinStatus !== 'string') {
-    return { success: false, error: 'frankensteinStatus must be a string.' }
-  }
+  const concept = str(get(o, 'concept', 'concept'))
+  if (!concept.trim()) return { success: false, error: 'concept is required.' }
 
-  const corePainPoint = o.corePainPoint
-  if (typeof corePainPoint !== 'string') {
-    return { success: false, error: 'corePainPoint must be a string.' }
-  }
+  const inScopeRaw = get(o, 'inScope', 'in_scope')
+  if (!isStringArray(inScopeRaw)) return { success: false, error: 'inScope / in_scope must be an array of strings.' }
 
-  const concept = o.concept
-  if (typeof concept !== 'string' || !concept.trim()) {
-    return { success: false, error: 'concept is required and must be a non-empty string.' }
-  }
+  const outOfScopeRaw = get(o, 'outOfScope', 'out_of_scope')
+  if (!isStringArray(outOfScopeRaw)) return { success: false, error: 'outOfScope / out_of_scope must be an array of strings.' }
 
-  const levelOfService = o.levelOfService
-  if (typeof levelOfService !== 'string' || !LEVELS.includes(levelOfService as LevelOfService)) {
-    return { success: false, error: `levelOfService must be one of: ${LEVELS.join(', ')}.` }
-  }
+  const dodRaw = get(o, 'definitionOfDone', 'definition_of_done')
+  if (!isStringArray(dodRaw)) return { success: false, error: 'definitionOfDone / definition_of_done must be an array of strings.' }
 
-  if (!isStringArray(o.inScope)) {
-    return { success: false, error: 'inScope must be an array of strings.' }
-  }
-  if (!isStringArray(o.outOfScope)) {
-    return { success: false, error: 'outOfScope must be an array of strings.' }
-  }
-  if (!isStringArray(o.clientMustProvide)) {
-    return { success: false, error: 'clientMustProvide must be an array of strings.' }
-  }
-  const clientObligations = isStringArray(o.clientObligations) ? o.clientObligations : []
-  if (!isStringArray(o.technicalDependencies)) {
-    return { success: false, error: 'technicalDependencies must be an array of strings.' }
-  }
-  if (!isStringArray(o.definitionOfDone)) {
-    return { success: false, error: 'definitionOfDone must be an array of strings.' }
-  }
+  const levelRaw = str(get(o, 'levelOfService', 'level_of_service'))
+  const levelOfService: LevelOfService = LEVELS.includes(levelRaw as LevelOfService)
+    ? (levelRaw as LevelOfService)
+    : 'Level 1 (Micro-Tool/Website)'
 
-  const estimatedHours = o.estimatedHours
-  if (typeof estimatedHours !== 'string') {
-    return { success: false, error: 'estimatedHours must be a string.' }
-  }
-  const baseProjectFee = o.baseProjectFee
-  if (typeof baseProjectFee !== 'string') {
-    return { success: false, error: 'baseProjectFee must be a string.' }
-  }
-  const paymentMilestones = o.paymentMilestones
-  if (typeof paymentMilestones !== 'string') {
-    return { success: false, error: 'paymentMilestones must be a string.' }
-  }
-  const riskBuffer = o.riskBuffer
-  if (typeof riskBuffer !== 'string') {
-    return { success: false, error: 'riskBuffer must be a string.' }
-  }
-  const externalCosts = o.externalCosts
-  if (typeof externalCosts !== 'string') {
-    return { success: false, error: 'externalCosts must be a string.' }
-  }
+  const VALID: ContractType[] = ['hourly', 'weekly', 'project']
+  const ctRaw = str(get(o, 'contractType', 'contract_type'), 'hourly')
+    .toLowerCase().replace(/\s*\+\s*retainer\s*/i, '').replace(/\s*\+\s*maintenance\s*/i, '').trim()
+  const contractType: ContractType = VALID.includes(ctRaw as ContractType)
+    ? (ctRaw as ContractType) : 'hourly'
 
-  const contractTypeRaw = o.contractType
-  const contractType =
-    typeof contractTypeRaw === 'string' && CONTRACT_TYPES.includes(contractTypeRaw as ContractType)
-      ? (contractTypeRaw as ContractType)
-      : 'project'
+  const ctString = str(get(o, 'contractType', 'contract_type'), '')
+  const retainerFromFlag = bool(get(o, 'retainer', 'retainer'))
+  const retainer = retainerFromFlag || /retainer/i.test(ctString)
 
-  const projectMilestones = normalizeProjectMilestones(o.projectMilestones)
+  const maintenanceFromFlag = bool(get(o, 'maintenance', 'maintenance'))
+  const maintenance = maintenanceFromFlag || /maintenance/i.test(ctString)
 
-  const recipientName = typeof o.recipientName === 'string' ? o.recipientName : ''
-  const proposalDate = typeof o.proposalDate === 'string' ? o.proposalDate : ''
-  const signatureDueDate = typeof o.signatureDueDate === 'string' ? o.signatureDueDate : ''
-  const myName = typeof o.myName === 'string' ? o.myName : ''
-  const myBusinessName = typeof o.myBusinessName === 'string' ? o.myBusinessName : ''
-  const organisationName = typeof o.organisationName === 'string' ? o.organisationName : ''
-  const totalQuoteAmount = typeof o.totalQuoteAmount === 'string' ? o.totalQuoteAmount : ''
+  const cmpRaw = get(o, 'clientMustProvide', 'client_must_provide')
+  const tdRaw = get(o, 'technicalDependencies', 'technical_dependencies')
 
   const data: ProposalData = {
     clientName: clientName.trim(),
-    recipientName,
+    recipientName: str(get(o, 'recipientName', 'recipient_name')),
     businessType: businessType.trim(),
-    frankensteinStatus: String(frankensteinStatus),
-    corePainPoint: String(corePainPoint),
+    frankensteinStatus: str(get(o, 'frankensteinStatus', 'frankenstein_status')),
+    corePainPoint: str(get(o, 'corePainPoint', 'core_pain_point')),
     concept: concept.trim(),
-    levelOfService: levelOfService as LevelOfService,
-    inScope: o.inScope,
-    outOfScope: o.outOfScope,
-    clientMustProvide: o.clientMustProvide,
-    clientObligations,
-    technicalDependencies: o.technicalDependencies,
-    definitionOfDone: o.definitionOfDone,
-    estimatedHours: String(estimatedHours),
-    baseProjectFee: String(baseProjectFee),
-    paymentMilestones: String(paymentMilestones),
-    riskBuffer: String(riskBuffer),
-    externalCosts: String(externalCosts),
-    totalQuoteAmount,
+    levelOfService,
+    inScope: inScopeRaw,
+    outOfScope: outOfScopeRaw,
+    clientMustProvide: isStringArray(cmpRaw) ? cmpRaw : [],
+    obligations: normalizeObligations(o.obligations),
+    technicalDependencies: isStringArray(tdRaw) ? tdRaw : [],
+    definitionOfDone: dodRaw,
+    estimatedHours: str(get(o, 'estimatedHours', 'estimated_hours')),
+    estimatedTimeTotal: str(get(o, 'estimatedTimeTotal', 'estimated_time_total')),
+    baseProjectFee: str(get(o, 'baseProjectFee', 'base_project_fee')),
     contractType,
-    projectMilestones,
-    proposalDate,
-    signatureDueDate,
-    myName,
-    myBusinessName,
-    organisationName,
+    retainer,
+    retainerAmount: str(get(o, 'retainerAmount', 'retainer_amount') ?? get(o, 'retainerFee', 'retainer_fee')),
+    retainerDuration: str(get(o, 'retainerDuration', 'retainer_duration')),
+    retainerDetails: (() => {
+      const v = get(o, 'retainerDetails', 'retainer_details')
+      return isStringArray(v) ? v : []
+    })(),
+    maintenance,
+    maintenanceAmount: str(get(o, 'maintenanceAmount', 'maintenance_amount') ?? get(o, 'maintenanceFee', 'maintenance_fee')),
+    maintenanceDuration: str(get(o, 'maintenanceDuration', 'maintenance_duration')),
+    maintenanceDetails: (() => {
+      const v = get(o, 'maintenanceDetails', 'maintenance_details')
+      return isStringArray(v) ? v : []
+    })(),
+    paymentMilestones: str(get(o, 'paymentMilestones', 'payment_milestones')),
+    riskBuffer: str(get(o, 'riskBuffer', 'risk_buffer')),
+    externalCosts: str(get(o, 'externalCosts', 'external_costs')),
+    totalQuoteAmount: str(get(o, 'totalQuoteAmount', 'total_quote_amount')),
+    projectMilestones: normalizeMilestones(get(o, 'projectMilestones', 'project_milestones')),
+    termsAndConditions: normalizeTermsAndConditions(get(o, 'termsAndConditions', 'terms_and_conditions')),
+    proposalDate: str(get(o, 'proposalDate', 'proposal_date')),
+    signatureDueDate: str(get(o, 'signatureDueDate', 'signature_due_date')),
+    myName: str(get(o, 'myName', 'my_name')),
+    myBusinessName: str(get(o, 'myBusinessName', 'my_business_name')),
+    organisationName: str(get(o, 'organisationName', 'organisation_name')),
   }
 
   return { success: true, data }
