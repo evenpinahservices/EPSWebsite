@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { parseProposalData, type ProposalData } from '@/lib/proposal-types'
 import { parseTextProposal, isHebrewRtl, type TextProposalData } from '@/lib/text-proposal'
 
@@ -150,7 +150,7 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
               <NumberedList prefix="3.1" items={data.inScope} />
             </div>
             <div>
-              <p className="font-serif font-semibold text-primary-dark mb-2">3.2 Out of Scope / Future Features</p>
+              <p className="font-serif font-semibold text-primary-dark mb-2">3.2 Future Features</p>
               <NumberedList prefix="3.2" items={data.outOfScope} />
             </div>
           </div>
@@ -596,6 +596,9 @@ const JSON_TEMPLATE_REFERENCE = (
 
 type EditorMode = 'json' | 'text'
 
+const PROPOSAL_JSON_STORAGE_KEY = 'proposal-json-draft'
+const AUTOSAVE_DEBOUNCE_MS = 500
+
 export default function ProposalPage() {
   const [editorMode, setEditorMode] = useState<EditorMode>('json')
   const [rawInput, setRawInput] = useState(INITIAL_JSON)
@@ -603,6 +606,33 @@ export default function ProposalPage() {
   const [proposal, setProposal] = useState<ProposalData | null>(null)
   const [textProposal, setTextProposal] = useState<TextProposalData | null>(null)
   const [manualOpen, setManualOpen] = useState(false)
+
+  // Load saved JSON draft on mount
+  useEffect(() => {
+    try {
+      const saved = typeof window !== 'undefined' ? localStorage.getItem(PROPOSAL_JSON_STORAGE_KEY) : null
+      if (saved != null && saved.trim() !== '') {
+        setRawInput(saved)
+        validate(saved, 'json')
+      }
+    } catch {
+      // ignore
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
+  }, [])
+
+  // Autosave JSON editor content to localStorage (debounced)
+  useEffect(() => {
+    if (editorMode !== 'json' || typeof window === 'undefined') return
+    const t = setTimeout(() => {
+      try {
+        localStorage.setItem(PROPOSAL_JSON_STORAGE_KEY, rawInput)
+      } catch {
+        // ignore quota / private mode
+      }
+    }, AUTOSAVE_DEBOUNCE_MS)
+    return () => clearTimeout(t)
+  }, [rawInput, editorMode])
 
   const validate = useCallback((text: string, mode: EditorMode) => {
     setRawInput(text)
