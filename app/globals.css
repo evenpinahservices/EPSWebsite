@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Allura&family=Great+Vibes&family=Monsieur+La+Doulaise&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -83,4 +84,23 @@
 
 @page {
   margin: 0 !important;
+}
+
+/* RTL proposal: Hebrew font + direction for screen and print */
+#proposal-preview[dir="rtl"],
+.proposal-preview[dir="rtl"] {
+  font-family: 'Frank Ruhl Libre', 'Lora', serif;
+}
+
+@media print {
+  #proposal-preview[dir="rtl"],
+  .proposal-preview[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+    font-family: 'Frank Ruhl Libre', 'Lora', serif;
+  }
+
+  #proposal-preview[dir="rtl"] table {
+    direction: rtl;
+  }
 }

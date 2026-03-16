@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { parseProposalData, type ProposalData } from '@/lib/proposal-types'
 import { parseTextProposal, isHebrewRtl, type TextProposalData } from '@/lib/text-proposal'
+import { t, HE_LABELS } from '@/lib/proposal-frontend-map'
 
 const labelClass = 'font-serif font-semibold text-primary-dark'
 
@@ -23,21 +24,37 @@ function ProposalHeader({
   isRtl: boolean
   showSignatureDue?: boolean
 }) {
-  return (
-    <div
-      className="flex items-center justify-between gap-4 pb-4 mb-2 border-b border-highlight-gold/40 flex-wrap"
-      dir={isRtl ? 'rtl' : 'ltr'}
-    >
+  if (isRtl) {
+    return (
       <div
-        className={`flex items-center gap-3 ${isRtl ? 'justify-end' : ''}`}
-        dir={isRtl ? 'rtl' : 'ltr'}
+        className="flex items-center justify-between gap-4 pb-4 mb-2 border-b border-highlight-gold/40 flex-wrap"
+        dir="rtl"
       >
-        <img src="/logo.png" alt="Even Pinah Services" className="h-10 w-10 object-contain shrink-0" />
-        <p className={`font-serif text-lg font-semibold text-primary-dark ${isRtl ? 'text-right' : ''}`} dir={isRtl ? 'rtl' : undefined}>
-          {isRtl ? HEBREW_COMPANY_NAME : 'Even Pinah Services'}
-        </p>
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="שירותי אבן פינה" className="h-10 w-10 object-contain shrink-0" />
+          <p className="font-serif text-lg font-semibold text-primary-dark" dir="rtl">
+            {HEBREW_COMPANY_NAME}
+          </p>
+        </div>
+        <div className="text-sm text-primary-dark/80 space-y-1 text-left" dir="ltr">
+          {proposalDate && (
+            <p dir="rtl"><span className={labelClass}>{t('Date of proposal:', true)}</span> {proposalDate}</p>
+          )}
+          {showSignatureDue && signatureDueDate && (
+            <p dir="rtl"><span className={labelClass}>{t('Due date for signature:', true)}</span> {signatureDueDate}</p>
+          )}
+        </div>
       </div>
-      <div className={`text-sm text-primary-dark/80 space-y-1 ${isRtl ? 'text-left' : 'text-right'}`}>
+    )
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-4 pb-4 mb-2 border-b border-highlight-gold/40 flex-wrap">
+      <div className="flex items-center gap-3">
+        <img src="/logo.png" alt="Even Pinah Services" className="h-10 w-10 object-contain shrink-0" />
+        <p className="font-serif text-lg font-semibold text-primary-dark">Even Pinah Services</p>
+      </div>
+      <div className="text-sm text-primary-dark/80 space-y-1 text-right">
         {proposalDate && (
           <p><span className={labelClass}>Date of proposal:</span> {proposalDate}</p>
         )}
@@ -53,12 +70,13 @@ function ProposalHeader({
    Numbered list helper
    ──────────────────────────────────────────── */
 
-function NumberedList({ prefix, items }: { prefix: string; items: string[] }) {
+function NumberedList({ prefix, items, isRtl = false }: { prefix: string; items: string[]; isRtl?: boolean }) {
+  const spacing = isRtl ? 'ml-2' : 'mr-2'
   return (
     <ul className="list-none space-y-1 text-primary-dark">
       {items.map((item, i) => (
         <li key={i}>
-          <span className="tabular-nums text-primary-dark/90 mr-2">{prefix}.{i + 1}</span>
+          <span className={`tabular-nums text-primary-dark/90 ${spacing}`}>{prefix}.{i + 1}</span>
           {item}
         </li>
       ))}
@@ -79,11 +97,22 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
     (hasWeeks && !hasHours)
 
   const contractTypeDisplay = (() => {
-    let s = data.contractType as string
-    if (data.retainer) s += ' + retainer'
-    if (data.maintenance) s += ' + maintenance'
-    return s.replace(/\b\w/g, (c) => c.toUpperCase())
+    const tv = (v: string) => isRtl ? (HE_LABELS[v] ?? v) : v
+    const parts = [tv(data.contractType)]
+    if (data.retainer) parts.push(tv('retainer'))
+    if (data.maintenance) parts.push(tv('maintenance'))
+    const joined = parts.join(' + ')
+    return isRtl ? joined : joined.replace(/\b\w/g, (c) => c.toUpperCase())
   })()
+
+  const l = (label: string) => t(label, isRtl)
+  const numSpace = isRtl ? 'ml-2' : 'mr-2'
+  const bulletSpace = isRtl ? 'ml-2' : 'mr-2'
+  const nestedPad = isRtl ? 'pr-4' : 'pl-4'
+  const deepPad = isRtl ? 'pr-6' : 'pl-6'
+  const subRowPad = isRtl ? 'p-2 pr-8' : 'p-2 pl-8'
+  const tablePhaseAlign = isRtl ? 'text-right' : 'text-left'
+  const tableNumAlign = isRtl ? 'text-left' : 'text-right'
 
   // Section 4 subsection counter
   let sec4 = 0
@@ -107,65 +136,65 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
           showSignatureDue
         />
         <h1 className="font-serif text-xl font-semibold text-primary-dark text-center mb-8 mt-6">
-          Product Proposal
+          {l('Product Proposal')}
         </h1>
 
         {/* ── 1. Client Details ── */}
         <section className="mb-8">
-          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">1. Client Details</h2>
+          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">{l('1. Client Details')}</h2>
           <ul className="space-y-2 text-primary-dark list-none">
-            <li><span className="tabular-nums text-primary-dark/90 mr-2">1.1</span><span className={labelClass}>Client Name:</span> {data.clientName}</li>
+            <li><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>1.1</span><span className={labelClass}>{l('Client Name:')}</span> {data.clientName}</li>
             {data.recipientName && (
-              <li><span className="tabular-nums text-primary-dark/90 mr-2">1.2</span><span className={labelClass}>Addressed To:</span> {data.recipientName}</li>
+              <li><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>1.2</span><span className={labelClass}>{l('Addressed To:')}</span> {data.recipientName}</li>
             )}
             <li>
-              <span className="tabular-nums text-primary-dark/90 mr-2">{data.recipientName ? '1.3' : '1.2'}</span>
-              <span className={labelClass}>Business Type:</span> {data.businessType}
+              <span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{data.recipientName ? '1.3' : '1.2'}</span>
+              <span className={labelClass}>{l('Business Type:')}</span> {data.businessType}
             </li>
           </ul>
         </section>
 
         {/* ── 2. Executive Summary ── */}
         <section className="mb-8">
-          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">2. Executive Summary</h2>
+          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">{l('2. Executive Summary')}</h2>
           <div className="space-y-3 text-primary-dark">
             {data.frankensteinStatus && (
-              <p><span className="tabular-nums text-primary-dark/90 mr-2">2.1</span><span className={labelClass}>Current situation:</span> {data.frankensteinStatus}</p>
+              <p><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>2.1</span><span className={labelClass}>{l('Current situation:')}</span> {data.frankensteinStatus}</p>
             )}
             {data.corePainPoint && (
-              <p><span className="tabular-nums text-primary-dark/90 mr-2">2.2</span><span className={labelClass}>Core pain point:</span> {data.corePainPoint}</p>
+              <p><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>2.2</span><span className={labelClass}>{l('Core pain point:')}</span> {data.corePainPoint}</p>
             )}
             {data.concept && (
-              <p><span className="tabular-nums text-primary-dark/90 mr-2">2.3</span><span className={labelClass}>Concept:</span> {data.concept}</p>
+              <p><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>2.3</span><span className={labelClass}>{l('Concept:')}</span> {data.concept}</p>
             )}
           </div>
         </section>
 
         {/* ── 3. Project Scope ── */}
         <section className="mb-8">
-          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">3. Project Scope</h2>
+          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">{l('3. Project Scope')}</h2>
           <div className="space-y-4">
             <div>
-              <p className="font-serif font-semibold text-primary-dark mb-2">3.1 In Scope</p>
-              <NumberedList prefix="3.1" items={data.inScope} />
+              <p className="font-serif font-semibold text-primary-dark mb-2">{l('3.1 In Scope')}</p>
+              <NumberedList prefix="3.1" items={data.inScope} isRtl={isRtl} />
             </div>
             <div>
-              <p className="font-serif font-semibold text-primary-dark mb-2">3.2 Future Features</p>
-              <NumberedList prefix="3.2" items={data.outOfScope} />
+              <p className="font-serif font-semibold text-primary-dark mb-2">{l('3.2 Future Features')}</p>
+              <NumberedList prefix="3.2" items={data.outOfScope} isRtl={isRtl} />
             </div>
           </div>
         </section>
 
         {/* ── 4. Client Obligations ── */}
         <section className="mb-8">
-          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">4. Client Obligations</h2>
+          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">{l('4. Client Obligations')}</h2>
           <div className="space-y-4">
             {data.clientMustProvide.length > 0 && (() => {
               const n = sec4Next()
               return (
                 <div>
-                  <p className="font-serif font-semibold text-primary-dark mb-2">{n} Client Must Provide</p>
-                  <NumberedList prefix={n} items={data.clientMustProvide} />
+                  <p className="font-serif font-semibold text-primary-dark mb-2">{n} {l('Client Must Provide')}</p>
+                  <NumberedList prefix={n} items={data.clientMustProvide} isRtl={isRtl} />
                 </div>
               )
             })()}
@@ -174,8 +203,8 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
               const n = sec4Next()
               return (
                 <div>
-                  <p className="font-serif font-semibold text-primary-dark mb-2">{n} Assets</p>
-                  <NumberedList prefix={n} items={data.obligations.assets} />
+                  <p className="font-serif font-semibold text-primary-dark mb-2">{n} {l('Assets')}</p>
+                  <NumberedList prefix={n} items={data.obligations.assets} isRtl={isRtl} />
                 </div>
               )
             })()}
@@ -184,8 +213,8 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
               const n = sec4Next()
               return (
                 <div>
-                  <p className="font-serif font-semibold text-primary-dark mb-2">{n} Technical</p>
-                  <NumberedList prefix={n} items={data.obligations.technical} />
+                  <p className="font-serif font-semibold text-primary-dark mb-2">{n} {l('Technical')}</p>
+                  <NumberedList prefix={n} items={data.obligations.technical} isRtl={isRtl} />
                 </div>
               )
             })()}
@@ -194,8 +223,8 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
               const n = sec4Next()
               return (
                 <div>
-                  <p className="font-serif font-semibold text-primary-dark mb-2">{n} Timeline</p>
-                  <NumberedList prefix={n} items={data.obligations.timeline} />
+                  <p className="font-serif font-semibold text-primary-dark mb-2">{n} {l('Timeline')}</p>
+                  <NumberedList prefix={n} items={data.obligations.timeline} isRtl={isRtl} />
                 </div>
               )
             })()}
@@ -204,8 +233,8 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
               const n = sec4Next()
               return (
                 <div>
-                  <p className="font-serif font-semibold text-primary-dark mb-2">{n} Technical Dependencies</p>
-                  <NumberedList prefix={n} items={data.technicalDependencies} />
+                  <p className="font-serif font-semibold text-primary-dark mb-2">{n} {l('Technical Dependencies')}</p>
+                  <NumberedList prefix={n} items={data.technicalDependencies} isRtl={isRtl} />
                 </div>
               )
             })()}
@@ -214,23 +243,23 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
 
         {/* ── 5. Success Metrics ── */}
         <section className="mb-8">
-          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">5. Success Metrics</h2>
-          <NumberedList prefix="5" items={data.definitionOfDone} />
+          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">{l('5. Success Metrics')}</h2>
+          <NumberedList prefix="5" items={data.definitionOfDone} isRtl={isRtl} />
         </section>
 
         {/* ── 6. Quote ── */}
         <section className="mb-8">
-          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">6. Quote</h2>
+          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">{l('6. Quote')}</h2>
           <ul className="space-y-2 text-primary-dark list-none">
-            <li><span className="tabular-nums text-primary-dark/90 mr-2">{q()}</span><span className={labelClass}>Contract Type:</span> {contractTypeDisplay}</li>
+            <li><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{q()}</span><span className={labelClass}>{l('Contract Type:')}</span> {contractTypeDisplay}</li>
             {data.estimatedHours && (
-              <li><span className="tabular-nums text-primary-dark/90 mr-2">{q()}</span><span className={labelClass}>Estimated Development Hours:</span> {data.estimatedHours}</li>
+              <li><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{q()}</span><span className={labelClass}>{l('Estimated Development Hours:')}</span> {data.estimatedHours}</li>
             )}
             {data.estimatedTimeTotal && (
-              <li><span className="tabular-nums text-primary-dark/90 mr-2">{q()}</span><span className={labelClass}>Estimated Time Total:</span> {data.estimatedTimeTotal}</li>
+              <li><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{q()}</span><span className={labelClass}>{l('Estimated Time Total:')}</span> {data.estimatedTimeTotal}</li>
             )}
             {data.baseProjectFee && (
-              <li><span className="tabular-nums text-primary-dark/90 mr-2">{q()}</span><span className={labelClass}>Project Fee:</span> {data.baseProjectFee}</li>
+              <li><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{q()}</span><span className={labelClass}>{l('Project Fee:')}</span> {data.baseProjectFee}</li>
             )}
           </ul>
 
@@ -240,20 +269,20 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
             const rNext = () => { rSub++; return `${rn}.${rSub}` }
             return (
               <div className="mt-4">
-                <p className="text-primary-dark mb-2"><span className="tabular-nums text-primary-dark/90 mr-2">{rn}</span><span className={labelClass}>Retainer</span></p>
-                <ul className="space-y-2 text-primary-dark list-none pl-4">
+                <p className="text-primary-dark mb-2"><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{rn}</span><span className={labelClass}>{l('Retainer')}</span></p>
+                <ul className={`space-y-2 text-primary-dark list-none ${nestedPad}`}>
                   {data.retainerAmount && (
-                    <li><span className="tabular-nums text-primary-dark/90 mr-2">{rNext()}</span><span className={labelClass}>Retainer Fee:</span> {data.retainerAmount}</li>
+                    <li><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{rNext()}</span><span className={labelClass}>{l('Retainer Fee:')}</span> {data.retainerAmount}</li>
                   )}
                   {data.retainerDuration && (
-                    <li><span className="tabular-nums text-primary-dark/90 mr-2">{rNext()}</span><span className={labelClass}>Retainer Duration:</span> {data.retainerDuration}</li>
+                    <li><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{rNext()}</span><span className={labelClass}>{l('Retainer Duration:')}</span> {data.retainerDuration}</li>
                   )}
                   {data.retainerDetails.length > 0 && (
                     <li>
-                      <span className="tabular-nums text-primary-dark/90 mr-2">{rNext()}</span><span className={labelClass}>Retainer Details:</span>
-                      <ul className="list-none space-y-1 text-primary-dark mt-1 pl-6">
+                      <span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{rNext()}</span><span className={labelClass}>{l('Retainer Details:')}</span>
+                      <ul className={`list-none space-y-1 text-primary-dark mt-1 ${deepPad}`}>
                         {data.retainerDetails.map((item, i) => (
-                          <li key={i}><span className="text-primary-dark/90 mr-2">•</span>{item}</li>
+                          <li key={i}><span className={`text-primary-dark/90 ${bulletSpace}`}>•</span>{item}</li>
                         ))}
                       </ul>
                     </li>
@@ -269,20 +298,20 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
             const mNext = () => { mSub++; return `${mn}.${mSub}` }
             return (
               <div className="mt-4">
-                <p className="text-primary-dark mb-2"><span className="tabular-nums text-primary-dark/90 mr-2">{mn}</span><span className={labelClass}>Maintenance</span></p>
-                <ul className="space-y-2 text-primary-dark list-none pl-4">
+                <p className="text-primary-dark mb-2"><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{mn}</span><span className={labelClass}>{l('Maintenance')}</span></p>
+                <ul className={`space-y-2 text-primary-dark list-none ${nestedPad}`}>
                   {data.maintenanceAmount && (
-                    <li><span className="tabular-nums text-primary-dark/90 mr-2">{mNext()}</span><span className={labelClass}>Maintenance Fee:</span> {data.maintenanceAmount}</li>
+                    <li><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{mNext()}</span><span className={labelClass}>{l('Maintenance Fee:')}</span> {data.maintenanceAmount}</li>
                   )}
                   {data.maintenanceDuration && (
-                    <li><span className="tabular-nums text-primary-dark/90 mr-2">{mNext()}</span><span className={labelClass}>Maintenance Duration:</span> {data.maintenanceDuration}</li>
+                    <li><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{mNext()}</span><span className={labelClass}>{l('Maintenance Duration:')}</span> {data.maintenanceDuration}</li>
                   )}
                   {data.maintenanceDetails.length > 0 && (
                     <li>
-                      <span className="tabular-nums text-primary-dark/90 mr-2">{mNext()}</span><span className={labelClass}>Maintenance Details:</span>
-                      <ul className="list-none space-y-1 text-primary-dark mt-1 pl-6">
+                      <span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{mNext()}</span><span className={labelClass}>{l('Maintenance Details:')}</span>
+                      <ul className={`list-none space-y-1 text-primary-dark mt-1 ${deepPad}`}>
                         {data.maintenanceDetails.map((item, i) => (
-                          <li key={i}><span className="text-primary-dark/90 mr-2">•</span>{item}</li>
+                          <li key={i}><span className={`text-primary-dark/90 ${bulletSpace}`}>•</span>{item}</li>
                         ))}
                       </ul>
                     </li>
@@ -294,36 +323,36 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
 
           <ul className={`space-y-2 text-primary-dark list-none ${data.retainer || data.maintenance ? 'mt-4' : ''}`}>
             {data.paymentMilestones && (
-              <li><span className="tabular-nums text-primary-dark/90 mr-2">{q()}</span><span className={labelClass}>Payment Milestones:</span> {data.paymentMilestones}</li>
+              <li><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{q()}</span><span className={labelClass}>{l('Payment Milestones:')}</span> {data.paymentMilestones}</li>
             )}
             {data.riskBuffer && (
-              <li><span className="tabular-nums text-primary-dark/90 mr-2">{q()}</span><span className={labelClass}>Risk Buffer:</span> {data.riskBuffer}</li>
+              <li><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{q()}</span><span className={labelClass}>{l('Risk Buffer:')}</span> {data.riskBuffer}</li>
             )}
             {data.externalCosts && (
-              <li><span className="tabular-nums text-primary-dark/90 mr-2">{q()}</span><span className={labelClass}>External Costs:</span> {data.externalCosts}</li>
+              <li><span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>{q()}</span><span className={labelClass}>{l('External Costs:')}</span> {data.externalCosts}</li>
             )}
           </ul>
         </section>
 
         {/* ── 7. Project Milestones ── */}
         <section className="mb-10">
-          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">7. Project Milestones</h2>
+          <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">{l('7. Project Milestones')}</h2>
           <p className="text-sm text-primary-dark/80 mb-3">
-            {useWeeks ? 'Breakdown by estimated weeks per phase.' : 'Breakdown by estimated hours per phase.'}
+            {useWeeks ? l('Breakdown by estimated weeks per phase.') : l('Breakdown by estimated hours per phase.')}
           </p>
           <div className="overflow-x-auto rounded-lg border border-primary-dark/40">
             <table className="w-full font-serif text-primary-dark border-collapse">
               <thead>
                 <tr className="bg-highlight-gold/5">
-                  <th className="text-left font-semibold p-3 border-b border-primary-dark/25 align-top min-w-[11rem]">Phase / Milestone</th>
-                  <th className="text-right font-semibold p-3 border-b border-primary-dark/25 w-32 align-top whitespace-nowrap">
-                    {useWeeks ? 'Estimated weeks' : 'Estimated hours'}
+                  <th className={`${tablePhaseAlign} font-semibold p-3 border-b border-primary-dark/25 align-top min-w-[11rem]`}>{l('Phase / Milestone')}</th>
+                  <th className={`${tableNumAlign} font-semibold p-3 border-b border-primary-dark/25 w-32 align-top whitespace-nowrap`}>
+                    {useWeeks ? l('Estimated weeks') : l('Estimated hours')}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {data.projectMilestones.length === 0 ? (
-                  <tr><td colSpan={2} className="p-3 text-primary-dark/70 text-sm">No milestones defined.</td></tr>
+                  <tr><td colSpan={2} className="p-3 text-primary-dark/70 text-sm">{l('No milestones defined.')}</td></tr>
                 ) : (
                   data.projectMilestones.flatMap((m, i) => {
                     const cellText = useWeeks
@@ -336,7 +365,7 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
                     const mainRow = (
                       <tr key={i} className="border-b border-primary-dark/15">
                         <td className="p-3 align-top font-medium">{m.name}</td>
-                        <td className="p-3 text-right tabular-nums align-top">{cellText}</td>
+                        <td className={`p-3 ${tableNumAlign} tabular-nums align-top`}>{cellText}</td>
                       </tr>
                     )
                     const subRows = (m.subFeatures ?? []).map((sub, j) => {
@@ -347,8 +376,8 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
                       })()
                       return (
                         <tr key={`${i}-${j}`} className="border-b border-primary-dark/15 bg-highlight-gold/5">
-                          <td className="p-2 pl-8 align-top text-primary-dark/85 text-xs">{sub.name}</td>
-                          <td className="p-2 text-right tabular-nums align-top text-xs">{subText}</td>
+                          <td className={`${subRowPad} align-top text-primary-dark/85 text-xs`}>{sub.name}</td>
+                          <td className={`p-2 ${tableNumAlign} tabular-nums align-top text-xs`}>{subText}</td>
                         </tr>
                       )
                     })
@@ -358,12 +387,12 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
               </tbody>
               <tfoot>
                 <tr className="bg-highlight-gold/5 font-semibold">
-                  <td className="p-3 border-t border-primary-dark/25 align-top">Total</td>
-                  <td className="p-3 text-right tabular-nums border-t border-primary-dark/25 align-top">
+                  <td className="p-3 border-t border-primary-dark/25 align-top">{l('Total')}</td>
+                  <td className={`p-3 ${tableNumAlign} tabular-nums border-t border-primary-dark/25 align-top`}>
                     {(() => {
                       if (useWeeks) {
-                        const t = data.projectMilestones.reduce((s, m) => s + (m.weeks ?? 0), 0)
-                        return t > 0 ? String(t) : '—'
+                        const tot = data.projectMilestones.reduce((s, m) => s + (m.weeks ?? 0), 0)
+                        return tot > 0 ? String(tot) : '—'
                       }
                       const lo = data.projectMilestones.reduce((s, m) => s + (m.hours ?? 0), 0)
                       const hi = data.projectMilestones.reduce((s, m) => s + (m.hoursMax ?? m.hours ?? 0), 0)
@@ -375,7 +404,7 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
             </table>
           </div>
           <p className="font-serif text-xl font-semibold text-primary-dark mt-6">
-            Total quote amount: {data.totalQuoteAmount || '—'}
+            {l('Total quote amount:')} {data.totalQuoteAmount || '—'}
           </p>
         </section>
 
@@ -384,12 +413,12 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
           ? data.termsAndConditions.length > 0
           : Object.keys(data.termsAndConditions).length > 0) && (
           <section className="mb-10">
-            <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">8. Terms and Conditions</h2>
+            <h2 className="font-serif text-lg font-semibold text-primary-dark mb-4">{l('8. Terms and Conditions')}</h2>
             {Array.isArray(data.termsAndConditions) ? (
               <ul className="list-none space-y-2 text-primary-dark">
                 {data.termsAndConditions.map((item, i) => (
                   <li key={i}>
-                    <span className="tabular-nums text-primary-dark/90 font-semibold mr-2">{i + 1}.</span>
+                    <span className={`tabular-nums text-primary-dark/90 font-semibold ${numSpace}`}>{i + 1}.</span>
                     {item}
                   </li>
                 ))}
@@ -406,7 +435,8 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
                     entries.splice(generalIdx, 0, vatEntry)
                   }
                   return entries.map(([key, value], idx) => {
-                    const title = key.replace(/^(\d+)_/, '$1. ').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+                    const rawTitle = key.replace(/^(\d+)_/, '$1. ').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+                    const title = l(rawTitle)
                     const items = Array.isArray(value) ? value : [value]
                     return (
                       <div key={key}>
@@ -414,7 +444,7 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
                         <ul className="list-none space-y-1 text-primary-dark">
                           {items.map((item, i) => (
                             <li key={i}>
-                              <span className="tabular-nums text-primary-dark/90 mr-2">8.{idx + 1}.{i + 1}</span>
+                              <span className={`tabular-nums text-primary-dark/90 ${numSpace}`}>8.{idx + 1}.{i + 1}</span>
                               {item}
                             </li>
                           ))}
@@ -430,23 +460,23 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
 
         {/* ── Signatures ── */}
         <div className="pt-8 mt-10 border-t border-highlight-gold/40">
-          <p className="font-serif font-semibold text-primary-dark mb-6">Signatures</p>
+          <p className="font-serif font-semibold text-primary-dark mb-6">{l('Signatures')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
             <div>
               <p className="font-serif font-semibold text-primary-dark">{data.myName || '—'}</p>
               <p className="text-sm text-primary-dark/80 mb-4">{data.myBusinessName || '—'}</p>
               <div className="mt-8 h-px bg-primary-dark/30 w-3/4" aria-hidden />
-              <p className="text-xs text-primary-dark/70 mt-1">Signature</p>
+              <p className="text-xs text-primary-dark/70 mt-1">{l('Signature')}</p>
               <div className="mt-7 w-24 border-b border-primary-dark/30" style={{ height: 0 }} aria-hidden />
-              <p className="text-xs text-primary-dark/70 mt-1">Date</p>
+              <p className="text-xs text-primary-dark/70 mt-1">{l('Date')}</p>
             </div>
             <div>
               <p className="font-serif font-semibold text-primary-dark">{data.recipientName || '—'}</p>
               <p className="text-sm text-primary-dark/80 mb-4">{data.organisationName || '—'}</p>
               <div className="mt-8 h-px bg-primary-dark/30 w-3/4" aria-hidden />
-              <p className="text-xs text-primary-dark/70 mt-1">Signature</p>
+              <p className="text-xs text-primary-dark/70 mt-1">{l('Signature')}</p>
               <div className="mt-7 w-24 border-b border-primary-dark/30" style={{ height: 0 }} aria-hidden />
-              <p className="text-xs text-primary-dark/70 mt-1">Date</p>
+              <p className="text-xs text-primary-dark/70 mt-1">{l('Date')}</p>
             </div>
           </div>
         </div>
@@ -471,6 +501,9 @@ function TextProposalPreview({ data, isRtl }: { data: TextProposalData; isRtl: b
     }
   }
 
+  const numSpace = isRtl ? 'ml-2' : 'mr-2'
+  const defaultTitle = isRtl ? 'הצעה' : 'Proposal'
+
   return (
     <article
       id="proposal-preview"
@@ -480,7 +513,7 @@ function TextProposalPreview({ data, isRtl }: { data: TextProposalData; isRtl: b
       <div className="p-8 sm:p-10 md:p-12">
         <ProposalHeader proposalDate={data.date} isRtl={isRtl} showSignatureDue={false} />
         <h1 className="font-serif text-xl font-semibold text-primary-dark text-center mb-8 mt-6">
-          {data.title || 'Proposal'}
+          {data.title || defaultTitle}
         </h1>
         <div className="space-y-8">
           {groups.map((g, gi) => (
@@ -491,7 +524,7 @@ function TextProposalPreview({ data, isRtl }: { data: TextProposalData; isRtl: b
               <ul className="list-none space-y-2 text-primary-dark">
                 {g.items.map((sec, i) => (
                   <li key={i}>
-                    <span className={`tabular-nums text-primary-dark/90 font-semibold ${isRtl ? 'ml-2' : 'mr-2'}`}>
+                    <span className={`tabular-nums text-primary-dark/90 font-semibold ${numSpace}`}>
                       {sec.number}
                     </span>
                     {sec.content}
