@@ -242,17 +242,26 @@ export function parseProposalData(
     : 'Level 1 (Micro-Tool/Website)'
 
   const VALID: ContractType[] = ['hourly', 'weekly', 'project']
-  const ctRaw = str(get(o, 'contractType', 'contract_type'), 'hourly')
-    .toLowerCase().replace(/\s*\+\s*retainer\s*/i, '').replace(/\s*\+\s*maintenance\s*/i, '').trim()
-  const contractType: ContractType = VALID.includes(ctRaw as ContractType)
-    ? (ctRaw as ContractType) : 'hourly'
+  const HE_CONTRACT_MAP: Record<string, ContractType> = {
+    'שעתי': 'hourly',
+    'שבועי': 'weekly',
+    'פרויקט': 'project',
+  }
+  const ctStripped = str(get(o, 'contractType', 'contract_type'), 'hourly')
+    .toLowerCase()
+    .replace(/\s*\+\s*retainer\s*/i, '').replace(/\s*\+\s*maintenance\s*/i, '')
+    .replace(/\s*\+\s*ריטיינר\s*/, '').replace(/\s*\+\s*תחזוקה\s*/, '')
+    .trim()
+  const contractType: ContractType =
+    VALID.includes(ctStripped as ContractType) ? (ctStripped as ContractType)
+    : HE_CONTRACT_MAP[ctStripped] ?? 'hourly'
 
   const ctString = str(get(o, 'contractType', 'contract_type'), '')
   const retainerFromFlag = bool(get(o, 'retainer', 'retainer'))
-  const retainer = retainerFromFlag || /retainer/i.test(ctString)
+  const retainer = retainerFromFlag || /retainer|ריטיינר/i.test(ctString)
 
   const maintenanceFromFlag = bool(get(o, 'maintenance', 'maintenance'))
-  const maintenance = maintenanceFromFlag || /maintenance/i.test(ctString)
+  const maintenance = maintenanceFromFlag || /maintenance|תחזוקה/i.test(ctString)
 
   const cmpRaw = get(o, 'clientMustProvide', 'client_must_provide')
   const tdRaw = get(o, 'technicalDependencies', 'technical_dependencies')

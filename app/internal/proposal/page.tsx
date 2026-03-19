@@ -471,7 +471,7 @@ function ProposalPreview({ data, isRtl = false }: { data: ProposalData; isRtl?: 
               <p className="text-xs text-primary-dark/70 mt-1">{l('Date')}</p>
             </div>
             <div>
-              <p className="font-serif font-semibold text-primary-dark">{data.recipientName || '—'}</p>
+              <p className="font-serif font-semibold text-primary-dark">{data.recipientName || data.clientName || '—'}</p>
               <p className="text-sm text-primary-dark/80 mb-4">{data.organisationName || '—'}</p>
               <div className="mt-8 h-px bg-primary-dark/30 w-3/4" aria-hidden />
               <p className="text-xs text-primary-dark/70 mt-1">{l('Signature')}</p>
