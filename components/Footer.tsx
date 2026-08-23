@@ -49,6 +49,22 @@ export default function Footer() {
             >
               Contact
             </motion.a>
+            <motion.a
+              href="/privacy"
+              whileHover={{ scale: 1.1, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              className="text-background-light/80 hover:text-background-light transition-colors"
+            >
+              Privacy Policy
+            </motion.a>
+            <motion.a
+              href="/terms"
+              whileHover={{ scale: 1.1, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              className="text-background-light/80 hover:text-background-light transition-colors"
+            >
+              Terms of Service
+            </motion.a>
           </nav>
         </div>
       </div>
