@@ -2,11 +2,16 @@
 
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion'
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 
 export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const { scrollY } = useScroll()
+  const pathname = usePathname()
+  const isHome = pathname === '/'
+  const contactHref = isHome ? '#contact' : '/#contact'
+  const homeHref = isHome ? '#' : '/'
 
   useMotionValueEvent(scrollY, 'change', (latest) => {
     if (latest > lastScrollY && latest > 100) {
@@ -29,7 +34,7 @@ export default function Navbar() {
           {/* Logo - Left side */}
           <div className="flex-shrink-0">
             <motion.a
-              href="#"
+              href={homeHref}
               whileHover={{ scale: 1.02 }}
               className="flex items-center gap-2 sm:gap-2.5 md:gap-3"
             >
@@ -48,7 +53,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2 sm:gap-3 md:gap-3">
             {/* Contact Button - Larger on mobile/tablet */}
             <a
-              href="#contact"
+              href={contactHref}
               className="inline-flex items-center px-4 sm:px-5 md:px-4 py-2 sm:py-2.5 md:py-2 border border-primary-dark text-primary-dark rounded-full font-medium text-sm sm:text-base md:text-xs hover:bg-primary-dark/5 transition-colors whitespace-nowrap"
             >
               Contact
@@ -56,7 +61,7 @@ export default function Navbar() {
 
             {/* Book a Meeting Button - Larger on mobile/tablet */}
             <motion.a
-              href="#contact"
+              href={contactHref}
               className="relative inline-flex items-center gap-2 sm:gap-2 md:gap-1.5 px-4 sm:px-5 md:px-4 py-2 sm:py-2.5 md:py-2 bg-primary-dark text-background-light rounded-full overflow-hidden group"
               whileHover="hover"
               initial="initial"

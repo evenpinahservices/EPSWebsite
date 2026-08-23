@@ -1,8 +1,13 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { usePathname } from 'next/navigation'
 
 export default function Footer() {
+  const pathname = usePathname()
+  const isHome = pathname === '/'
+  const sectionHref = (anchor: string) => (isHome ? `#${anchor}` : `/#${anchor}`)
+
   return (
     <footer className="bg-primary-dark text-background-light py-12">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -18,7 +23,7 @@ export default function Footer() {
           
           <nav className="flex gap-6 flex-wrap justify-center">
             <motion.a
-              href="#mission"
+              href={sectionHref('mission')}
               whileHover={{ scale: 1.1, y: -2 }}
               whileTap={{ scale: 0.95 }}
               className="text-background-light/80 hover:text-background-light transition-colors"
@@ -26,7 +31,7 @@ export default function Footer() {
               Mission
             </motion.a>
             <motion.a
-              href="#vision"
+              href={sectionHref('vision')}
               whileHover={{ scale: 1.1, y: -2 }}
               whileTap={{ scale: 0.95 }}
               className="text-background-light/80 hover:text-background-light transition-colors"
@@ -34,7 +39,7 @@ export default function Footer() {
               Vision
             </motion.a>
             <motion.a
-              href="#testimonials"
+              href={sectionHref('testimonials')}
               whileHover={{ scale: 1.1, y: -2 }}
               whileTap={{ scale: 0.95 }}
               className="text-background-light/80 hover:text-background-light transition-colors"
@@ -42,7 +47,15 @@ export default function Footer() {
               Testimonials
             </motion.a>
             <motion.a
-              href="#contact"
+              href="/whats2eat"
+              whileHover={{ scale: 1.1, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              className="text-background-light/80 hover:text-background-light transition-colors"
+            >
+              Whats2Eat
+            </motion.a>
+            <motion.a
+              href={sectionHref('contact')}
               whileHover={{ scale: 1.1, y: -2 }}
               whileTap={{ scale: 0.95 }}
               className="text-background-light/80 hover:text-background-light transition-colors"
