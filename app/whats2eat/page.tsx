@@ -54,6 +54,12 @@ export default function Whats2EatPage() {
             >
               Terms of Service
             </a>
+            <a
+              href="/whats2eat/order-demo"
+              className="text-secondary-accent hover:text-primary-dark transition-colors font-medium"
+            >
+              Order Demo
+            </a>
           </div>
         </div>
       </section>
